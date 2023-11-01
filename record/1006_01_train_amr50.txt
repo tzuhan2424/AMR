@@ -1,0 +1,178 @@
+{'num_workers': 32, 'voc12_root': '../VOCdevkit/VOC2012/', 'train_list': 'voc12/train_aug.txt', 'val_list': 'voc12/val.txt', 'infer_list': 'voc12/train.txt', 'chainer_eval_set': 'train', 'cam_network': 'net.resnet50_cam', 'amr_network': 'net.resnet50_amr', 'cam_crop_size': 512, 'cam_batch_size': 32, 'cam_num_epoches': 80, 'cam_learning_rate': 0.001, 'cam_weight_decay': 0.0001, 'cam_eval_thres': 0.2, 'cam_scales': (1.0, 0.5, 0.75, 1.25, 1.5, 1.75, 2.0), 'target_layer': 'stage4', 'adv_iter': 27, 'AD_coeff': 7, 'AD_stepsize': 0.08, 'score_th': 0.5, 'weight': 0.5, 'conf_fg_thres': 0.6, 'conf_bg_thres': 0.33, 'irn_network': 'net.resnet50_irn', 'irn_crop_size': 512, 'irn_batch_size': 16, 'irn_num_epoches': 3, 'irn_learning_rate': 0.1, 'irn_weight_decay': 0.0001, 'beta': 10, 'exp_times': 8, 'ins_seg_bg_thres': 0.25, 'sem_seg_bg_thres': 0.25, 'log_name': 'sample_train_eval', 'cam_weights_name': 'sess/1006_01_res50_cam.pth', 'amr_weights_name': 'sess/1006_01_res50_amr.pth', 'irn_weights_name': 'sess/res50_irn.pth', 'cam_out_dir': 'result/cams', 'ir_label_out_dir': 'result/ir_label', 'sem_seg_out_dir': 'result/sem_seg', 'ins_seg_out_dir': 'result/ins_seg', 'train_cam_pass': False, 'train_amr_pass': True, 'make_cam_pass': False, 'eval_cam_pass': False, 'cam_to_ir_label_pass': False, 'train_irn_pass': False, 'make_ins_seg_pass': False, 'eval_ins_seg_pass': False, 'make_sem_seg_pass': False, 'eval_sem_seg_pass': False}
+step.train_amr: Fri Oct  6 23:59:48 2023
+Epoch 1/80
+step:    0/ 1520 loss:0.7996 imps:12.1 lr: 0.0010 etc:Sat Oct  7 01:06:43 2023
+validating ... loss: 0.8260
+Epoch 2/80
+validating ... loss: 0.7967
+Epoch 3/80
+validating ... loss: 0.7824
+Epoch 4/80
+validating ... loss: 0.7489
+Epoch 5/80
+validating ... loss: 0.7342
+Epoch 6/80
+step:  100/ 1520 loss:0.6212 imps:42.1 lr: 0.0009 etc:Sat Oct  7 00:19:13 2023
+validating ... loss: 0.6907
+Epoch 7/80
+validating ... loss: 0.6873
+Epoch 8/80
+validating ... loss: 0.6653
+Epoch 9/80
+validating ... loss: 0.6524
+Epoch 10/80
+validating ... loss: 0.7273
+Epoch 11/80
+step:  200/ 1520 loss:0.5237 imps:46.4 lr: 0.0009 etc:Sat Oct  7 00:19:09 2023
+validating ... loss: 0.6096
+Epoch 12/80
+validating ... loss: 0.6258
+Epoch 13/80
+validating ... loss: 0.6608
+Epoch 14/80
+validating ... loss: 0.6431
+Epoch 15/80
+validating ... loss: 0.6559
+Epoch 16/80
+step:  300/ 1520 loss:0.5184 imps:47.6 lr: 0.0008 etc:Sat Oct  7 00:19:11 2023
+validating ... loss: 0.6876
+Epoch 17/80
+validating ... loss: 0.7098
+Epoch 18/80
+validating ... loss: 0.7234
+Epoch 19/80
+validating ... loss: 0.6937
+Epoch 20/80
+validating ... loss: 0.7142
+Epoch 21/80
+validating ... loss: 0.7359
+Epoch 22/80
+step:  400/ 1520 loss:0.5581 imps:27.7 lr: 0.0008 etc:Sat Oct  7 00:19:21 2023
+validating ... loss: 0.7365
+Epoch 23/80
+validating ... loss: 0.7554
+Epoch 24/80
+validating ... loss: 0.7485
+Epoch 25/80
+validating ... loss: 0.7959
+Epoch 26/80
+validating ... loss: 0.7501
+Epoch 27/80
+step:  500/ 1520 loss:0.6040 imps:40.8 lr: 0.0007 etc:Sat Oct  7 00:19:18 2023
+validating ... loss: 0.7478
+Epoch 28/80
+validating ... loss: 0.7878
+Epoch 29/80
+validating ... loss: 0.8064
+Epoch 30/80
+validating ... loss: 0.8040
+Epoch 31/80
+validating ... loss: 0.8124
+Epoch 32/80
+step:  600/ 1520 loss:0.6252 imps:47.0 lr: 0.0006 etc:Sat Oct  7 00:19:16 2023
+validating ... loss: 0.7983
+Epoch 33/80
+validating ... loss: 0.8141
+Epoch 34/80
+validating ... loss: 0.7676
+Epoch 35/80
+validating ... loss: 0.7768
+Epoch 36/80
+validating ... loss: 0.7913
+Epoch 37/80
+step:  700/ 1520 loss:0.6400 imps:50.1 lr: 0.0006 etc:Sat Oct  7 00:19:13 2023
+validating ... loss: 0.8360
+Epoch 38/80
+validating ... loss: 0.7903
+Epoch 39/80
+validating ... loss: 0.7829
+Epoch 40/80
+validating ... loss: 0.7880
+Epoch 41/80
+validating ... loss: 0.7954
+Epoch 42/80
+validating ... loss: 0.7805
+Epoch 43/80
+step:  800/ 1520 loss:0.6373 imps:31.8 lr: 0.0005 etc:Sat Oct  7 00:19:19 2023
+validating ... loss: 0.7748
+Epoch 44/80
+validating ... loss: 0.7786
+Epoch 45/80
+validating ... loss: 0.7662
+Epoch 46/80
+validating ... loss: 0.7896
+Epoch 47/80
+validating ... loss: 0.7731
+Epoch 48/80
+step:  900/ 1520 loss:0.6233 imps:43.5 lr: 0.0004 etc:Sat Oct  7 00:19:17 2023
+validating ... loss: 0.8023
+Epoch 49/80
+validating ... loss: 0.7944
+Epoch 50/80
+validating ... loss: 0.7943
+Epoch 51/80
+validating ... loss: 0.7765
+Epoch 52/80
+validating ... loss: 0.7815
+Epoch 53/80
+step: 1000/ 1520 loss:0.6265 imps:47.0 lr: 0.0004 etc:Sat Oct  7 00:19:16 2023
+validating ... loss: 0.7985
+Epoch 54/80
+validating ... loss: 0.8110
+Epoch 55/80
+validating ... loss: 0.7893
+Epoch 56/80
+validating ... loss: 0.7730
+Epoch 57/80
+validating ... loss: 0.7741
+Epoch 58/80
+step: 1100/ 1520 loss:0.6249 imps:49.2 lr: 0.0003 etc:Sat Oct  7 00:19:15 2023
+validating ... loss: 0.7859
+Epoch 59/80
+validating ... loss: 0.7772
+Epoch 60/80
+validating ... loss: 0.8013
+Epoch 61/80
+validating ... loss: 0.7755
+Epoch 62/80
+validating ... loss: 0.7903
+Epoch 63/80
+validating ... loss: 0.7782
+Epoch 64/80
+step: 1200/ 1520 loss:0.6191 imps:37.0 lr: 0.0002 etc:Sat Oct  7 00:19:18 2023
+validating ... loss: 0.8004
+Epoch 65/80
+validating ... loss: 0.7794
+Epoch 66/80
+validating ... loss: 0.7686
+Epoch 67/80
+validating ... loss: 0.7813
+Epoch 68/80
+validating ... loss: 0.7990
+Epoch 69/80
+step: 1300/ 1520 loss:0.6176 imps:46.9 lr: 0.0002 etc:Sat Oct  7 00:19:16 2023
+validating ... loss: 0.8016
+Epoch 70/80
+validating ... loss: 0.7856
+Epoch 71/80
+validating ... loss: 0.7812
+Epoch 72/80
+validating ... loss: 0.7872
+Epoch 73/80
+validating ... loss: 0.7800
+Epoch 74/80
+step: 1400/ 1520 loss:0.6062 imps:46.6 lr: 0.0001 etc:Sat Oct  7 00:19:15 2023
+validating ... loss: 0.7774
+Epoch 75/80
+validating ... loss: 0.7773
+Epoch 76/80
+validating ... loss: 0.7780
+Epoch 77/80
+validating ... loss: 0.7799
+Epoch 78/80
+validating ... loss: 0.7770
+Epoch 79/80
+step: 1500/ 1520 loss:0.6066 imps:49.5 lr: 0.0000 etc:Sat Oct  7 00:19:14 2023
+validating ... loss: 0.7749
+Epoch 80/80
+validating ... loss: 0.7767
