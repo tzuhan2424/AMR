@@ -65,7 +65,7 @@ def saveDataset(my_list, file_name = "my_list.txt"):
 
 
 if __name__ == "__main__":
-    train_images, train_labels, test_images, test_labels=load('../data/Dataset_BUSI_with_GT')
+    train_images, train_labels, test_images, test_labels=load('../../data/Dataset_BUSI_with_GT')
     print(train_images[:5])
     print(train_labels[:5])
     print(test_images[:5])

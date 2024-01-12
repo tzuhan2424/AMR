@@ -253,6 +253,53 @@ def plot_with_bounding_boxes(image, points1, points2, bounding_box1, bounding_bo
     ax.add_patch(rect2)
 
     plt.show()
+def draw_bounding_boxes(image, bounding_box1, bounding_box2):
+    x_left1, x_right1, y_top1, y_bottom1 = bounding_box1
+    x_left2, x_right2, y_top2, y_bottom2 = bounding_box2
+
+    # Draw the first bounding box in red
+    image_with_boxes = cv2.rectangle(image.copy(), (x_left1, y_top1), (x_right1, y_bottom1), (255, 0, 0), 2)
+
+    # Draw the second bounding box in blue
+    image_with_boxes = cv2.rectangle(image_with_boxes, (x_left2, y_top2), (x_right2, y_bottom2), (0, 0, 255), 2)
+
+    return image_with_boxes
+
+def return_plot_with_bounding_boxes(image, points1, points2, bounding_box1, bounding_box2):
+    import matplotlib.pyplot as plt
+    from matplotlib.patches import Rectangle
+
+    x_left1, x_right1, y_top1, y_bottom1 = bounding_box1
+    x_left2, x_right2, y_top2, y_bottom2 = bounding_box2
+
+    # Create the figure and axis
+    fig, ax = plt.subplots()
+    ax.imshow(image, cmap='gray')
+
+    # Draw the first bounding box
+    rect1 = Rectangle((x_left1, y_top1), x_right1 - x_left1, y_bottom1 - y_top1,
+                     edgecolor='red', facecolor='none')
+    ax.add_patch(rect1)
+
+    # Draw the second bounding box
+    rect2 = Rectangle((x_left2, y_top2), x_right2 - x_left2, y_bottom2 - y_top2,
+                     edgecolor='blue', facecolor='none')
+    ax.add_patch(rect2)
+
+
+
+     # Render the figure to a canvas
+    fig.canvas.draw()
+
+    # Convert the figure to a NumPy array
+    img_data = np.frombuffer(fig.canvas.tostring_rgb(), dtype=np.uint8)
+    img_data = img_data.reshape(fig.canvas.get_width_height()[::-1] + (3,))
+    
+    plt.close(fig)  # Close the figure to free memory
+
+    return img_data
+
+
 
 
 
@@ -311,6 +358,41 @@ def plot_clustered_convex_hulls(image, points, n_clusters, colors):
                 plt.plot(cluster_points[simplex, 0], cluster_points[simplex, 1], colors[i] + '-')
 
     plt.show()
+
+
+
+def convexHullPic(camFolder, filename):
+    img_name, type = getPathShortName(filename)
+    # print(img_name[:-4])
+    image = cv2.imread(filename)
+    cam_path=os.path.join(camFolder, type, img_name[:-4] + '.npy')
+
+    loaded_data = np.load(cam_path,allow_pickle=True).item()
+    cam = loaded_data['high_res']
+    cam = (cam - cam.min()) / (cam.max() - cam.min()) * 255
+    cam = np.uint8(cam)
+    cam = cam.reshape((image.shape[0], image.shape[1]))
+
+
+    num=find_percent_threshold(cam, 0.025)
+    points1 = find_points_in_range(cam, num, 250)
+    bounding_box1 = find_extreme_points(points1)
+
+
+
+    num2=find_percent_threshold(cam, 0.01)
+    points2 = find_points_in_range(cam, num2, 250)
+    bounding_box2 = find_extreme_points(points2)
+
+
+    x1_leftMost, x1_rightMost, y1_top, y1_bottom = bounding_box1
+    x2_leftMost, x2_rightMost, y2_top, y2_bottom = bounding_box2
+
+    iou = rectangle_iou([x1_leftMost, y1_top, x1_rightMost, y1_bottom],[x2_leftMost, y2_top, x2_rightMost, y2_bottom])
+
+    pic = draw_bounding_boxes(image,bounding_box1,bounding_box2)
+
+    return pic, iou
 
 
 def getDot(camFolder, filename, isShow=False):
@@ -433,8 +515,44 @@ def convexHullGetValid(threshold = 0.7, train_path='/home/lintzuh@kean.edu/BUS/A
             for item in ROI_list:
                 file.write(f"{item[0]}, {item[1]}\n")
 
+
+def convexHullGetWholeTrainingSetLabel(threshold = 0.7, train_path='/home/lintzuh@kean.edu/BUS/AMR/record/ROI_FULLSET.txt', camFolder='result/cam_merge', isSaveROI=False):
+    train_set, _ = readFromSet_list(train_path)
+    ROI_list = []
+    for fullName in train_set:
+        #fullName = '/home/lintzuh@kean.edu/BUS/data/Dataset_BUSI_with_GT/benign/benign (270).png'
+        img_name, type = getPathShortName(fullName) #'benign (270).png'
+        image = cv2.imread(fullName)
+        cam_path=os.path.join(camFolder, type, img_name[:-4] + '.npy')
+        loaded_data = np.load(cam_path,allow_pickle=True).item()
+        cam = loaded_data['high_res']
+        cam = (cam - cam.min()) / (cam.max() - cam.min()) * 255
+        cam = np.uint8(cam)
+        cam = cam.reshape((image.shape[0], image.shape[1]))
+
+    
+        num=find_percent_threshold(cam, 0.025)
+        points1 = find_points_in_range(cam, num, 250)
+        bounding_box1 = find_extreme_points(points1)
+
+        x1_leftMost, x1_rightMost, y1_top, y1_bottom = bounding_box1
+        x,y,w,h = x1_leftMost, y1_top, x1_rightMost-x1_leftMost,y1_bottom-y1_top
+
+        ROI_list.append((img_name[:-4], (x, y, w, h)))   
+    
+    if isSaveROI:
+        file_path = 'convexHull_ROI_theWholeTrainingSet.txt'
+        with open(file_path, 'w') as file:
+            # Iterate over the list and write each item followed by a newline character
+            file.write('file name: (x, y, w, h)' + '\n')
+            for item in ROI_list:
+                file.write(f"{item[0]}, {item[1]}\n")
+
 if __name__ == '__main__':
-    convexHullGetValid(isSaveROI=True)
+    convexHullGetWholeTrainingSetLabel(isSaveROI=True)
+    # convexHullGetValid(isSaveROI=True)
+
+
     # dataRoot = '/home/lintzuh@kean.edu/BUS/data/Dataset_BUSI_with_GT'
     # filename = 'benign (126).png'
     # fullName = os.path.join(dataRoot,'benign' ,filename)
@@ -452,8 +570,9 @@ if __name__ == '__main__':
     # benign (270), (275, 25, 135, 67)
     # train_path = '/home/lintzuh@kean.edu/BUS/AMR/record/ROI_FULLSET.txt'
     # train_set, _ = readFromSet_list(train_path)
-    # i = 0
-    # # select=['benign (400)', 'benign (376)','benign (403)', 'benign (275)','benign (180)', 'benign (340)', 'benign (69)']
+    
+
+
     # dataroot = '/home/lintzuh@kean.edu/BUS/data/Dataset_BUSI_with_GT'
 
 
