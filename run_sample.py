@@ -135,9 +135,18 @@ if __name__ == '__main__':
         timer = pyutils.Timer('step.eval_cam:')
         step.eval_cam.run(args)
 
-
+    # args.cam_to_ir_label_pass = True
     if args.cam_to_ir_label_pass is True:
         import step.cam_to_ir_label
+        args.cam_out_dir = 'result/cam_merge'
+        # args.conf_fg_thres: 0.4
+        # args.ir_label_out_dir = 'result/ir_label_test'
+
+        print('hello')
+
+
+
+
 
         timer = pyutils.Timer('step.cam_to_ir_label:')
         step.cam_to_ir_label.run(args)

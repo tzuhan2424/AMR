@@ -211,3 +211,21 @@ def getPathShortName(fullpath):
     return img_name, type
 
 
+def getFullName(name, dataroot):
+    import os
+    if name[0] == 'b':
+        type = 'benign'
+    elif name[0] == 'm':
+        type = 'malignant'
+    elif name[0] == 'n':
+        type = 'normal'
+
+    fullPath = os.path.join(dataroot, type, name+'.png')
+
+    return fullPath
+
+
+
+    
+
+
