@@ -34,16 +34,20 @@ def _work(process_id, infer_dataset, args):
 
         """
         shortname, type = getPathShortName(img_name)
+        subfolderPath = os.path.join(args.ir_label_out_dir, type)
+        os.makedirs(subfolderPath, exist_ok=True)
+
+
         
         campath = os.path.join(args.cam_out_dir, type, shortname[:-4] + '.npy')
         cam_dict = np.load(campath, allow_pickle=True).item()
 
         cams = cam_dict['high_res'] #cams.shape = [1, 598, 449]
-        a = torch.tensor([1])
 
-        # keys = np.pad(cam_dict['keys'], (1, 0), mode='constant') #cam_dict['keys'] = tensor([0])
-        keys = np.pad(a, (1, 0), mode='constant') #so after I modify keys = tensor([0,1])
-
+        keys = np.pad(cam_dict['keys'], (1, 0), mode='constant') #cam_dict['keys'] = tensor([0])
+        # print(img_name)
+        # print(cam_dict['keys'])
+        # print(keys)
 
 
 
@@ -61,19 +65,23 @@ def _work(process_id, infer_dataset, args):
 
         # 2. combine confident fg & bg
         conf = fg_conf.copy()
-        # conf[fg_conf == 0] = 255
+        conf[fg_conf == 0] = 255
+        conf[bg_conf + fg_conf == 0] = 0
+        # so the white region after these three line is bg_thres<cam.value<fg_thres
+        
+
+
+
+
+        # conf[fg_conf == 1] = 255
         # conf[bg_conf + fg_conf == 0] = 0
 
-        
-        conf[fg_conf == 1] = 255
-        conf[bg_conf + fg_conf == 0] = 0
-
-        conf_palette = fg_conf.copy()
-        conf_palette[fg_conf == 1] = 1
-        conf_palette[bg_conf + fg_conf == 0] = 0
+        # conf_palette = fg_conf.copy()
+        # conf_palette[fg_conf == 1] = 1
+        # conf_palette[bg_conf + fg_conf == 0] = 0
 
 
-        out = Image.fromarray(conf_palette.astype(np.uint8), mode='P')
+        out = Image.fromarray(conf.astype(np.uint8), mode='P')
         out.putpalette(palette)
 
         outpath = os.path.join(args.ir_label_out_dir, type, shortname[:-4])
@@ -104,8 +112,8 @@ def run(args):
         return full_paths
     
 
-    train_images_short=['benign (1).png', 'malignant (1).png']
-    images = getFull(train_images_short)
+    # train_images_short=['normal (1).png', 'benign (1).png', 'malignant (1).png']
+    # images = getFull(train_images_short)
 
 
     dataset = BUS.dataloader.BUSImageDataset(train_images, img_normal=None, to_torch=False)

@@ -51,14 +51,17 @@ class PathIndex:
             coord_indices_by_length[path_length].append(path_coords)
 
         path_list_by_length = [np.asarray(v) for v in coord_indices_by_length if v]
+
+        # print('path_list_by_length', path_list_by_length)
+        # print('len(path_list_by_length)', len(path_list_by_length))
         path_destinations = np.concatenate([p[:, 0] for p in path_list_by_length], axis=0)
 
         return path_list_by_length, path_destinations
 
     def get_path_indices(self, size):
-
+        print('size', size)
         full_indices = np.reshape(np.arange(0, size[0] * size[1], dtype=np.int64), (size[0], size[1]))
-
+        print('full_indices', full_indices)
         cropped_height = size[0] - self.radius_floor
         cropped_width = size[1] - 2 * self.radius_floor
 
@@ -74,6 +77,7 @@ class PathIndex:
                 for dy, dx in p:
                     coord_indices = full_indices[dy:dy + cropped_height,
                                     self.radius_floor + dx:self.radius_floor + dx + cropped_width]
+                    # print('coord_indices', coord_indices)
                     coord_indices = np.reshape(coord_indices, [-1])
 
                     coord_indices_list.append(coord_indices)
@@ -82,6 +86,8 @@ class PathIndex:
 
             path_indices.append(np.array(path_indices_list))
 
+        # print('path_indices', path_indices)
+        # print('len(path_indices)', len(path_indices))
         src_indices = np.reshape(full_indices[:cropped_height, self.radius_floor:self.radius_floor + cropped_width], -1)
         dst_indices = np.concatenate([p[:,0] for p in path_indices], axis=0)
 
@@ -91,15 +97,23 @@ class PathIndex:
 def edge_to_affinity(edge, paths_indices):
 
     aff_list = []
+    print('edge before', edge.shape)
     edge = edge.view(edge.size(0), -1)
+    print('edge after', edge.shape)
 
     for i in range(len(paths_indices)):
         if isinstance(paths_indices[i], np.ndarray):
             paths_indices[i] = torch.from_numpy(paths_indices[i])
         paths_indices[i] = paths_indices[i].cuda(non_blocking=True)
 
+
     for ind in paths_indices:
         ind_flat = ind.view(-1)
+
+
+        print('ind_flat', ind_flat)
+        assert ind_flat.max() < edge.size(-1), "Index out of bounds"
+
         dist = torch.index_select(edge, dim=-1, index=ind_flat)
         dist = dist.view(dist.size(0), ind.size(0), ind.size(1), ind.size(2))
         aff = torch.squeeze(1 - F.max_pool2d(dist, (dist.size(2), 1)), dim=2)
@@ -123,8 +137,14 @@ def affinity_sparse2dense(affinity_sparse, ind_from, ind_to, n_vertices):
 
     indices_id = torch.stack([torch.arange(0, n_vertices).long(), torch.arange(0, n_vertices).long()])
 
-    affinity_dense = torch.sparse.FloatTensor(torch.cat([indices, indices_id, indices_tp], dim=1),
-                                       torch.cat([affinity_sparse, torch.ones([n_vertices]), affinity_sparse])).to_dense().cuda()
+    # affinity_dense = torch.sparse.FloatTensor(torch.cat([indices, indices_id, indices_tp], dim=1),
+    #                                    torch.cat([affinity_sparse, torch.ones([n_vertices]), affinity_sparse])).to_dense().cuda()
+    
+    
+    indices_cat = torch.cat([indices, indices_id, indices_tp], dim=1)
+    values_cat = torch.cat([affinity_sparse, torch.ones([n_vertices]), affinity_sparse])
+    affinity_sparse_coo = torch.sparse_coo_tensor(indices_cat, values_cat, (n_vertices, n_vertices))
+    affinity_dense = affinity_sparse_coo.to_dense().cuda()
 
     return affinity_dense
 
@@ -144,6 +164,8 @@ def propagate_to_edge(x, edge, radius=5, beta=10, exp_times=8):
 
     hor_padded = width+radius*2
     ver_padded = height+radius
+    print('height, width', height, width)
+    print('(ver_padded, hor_padded)', ver_padded, hor_padded)
 
     path_index = PathIndex(radius=radius, default_size=(ver_padded, hor_padded))
 

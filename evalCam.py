@@ -11,8 +11,9 @@ from help.camHelper import compareDifferentCam, compareGTandCamROI
 
     
 #%%
+
     #now we have use selective search to get the ROI
-compareGTandCamROI(cam ='result/cam_merge', isShowPic=True, isSaveROI = True)
+compareGTandCamROI(cam ='result/cam_merge', isShowPic=True, isSaveROI = False)
     #%%
 # compareGTandCamROI(cam ='result/cams_compensation', isShowPic=True)
 #     #%%

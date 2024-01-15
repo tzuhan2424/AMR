@@ -3,11 +3,13 @@ import torch
 from torch.backends import cudnn
 cudnn.enabled = True
 from torch.utils.data import DataLoader
-import voc12.dataloader
+# import voc12.dataloader
 from misc import pyutils, torchutils, indexing
 import importlib
 from PIL import ImageFile
 ImageFile.LOAD_TRUNCATED_IMAGES = True
+import BUS.dataloader
+
 def run(args):
 
     path_index = indexing.PathIndex(radius=10, default_size=(args.irn_crop_size // 4, args.irn_crop_size // 4))
@@ -15,16 +17,33 @@ def run(args):
     model = getattr(importlib.import_module(args.irn_network), 'AffinityDisplacementLoss')(
         path_index)
     
-    train_dataset = voc12.dataloader.VOC12AffinityDataset(args.train_list,
-                                                          label_dir=args.ir_label_out_dir,
-                                                          voc12_root=args.voc12_root,
-                                                          indices_from=path_index.src_indices,
-                                                          indices_to=path_index.dst_indices,
-                                                          hor_flip=True,
-                                                          crop_size=args.irn_crop_size,
-                                                          crop_method="random",
-                                                          rescale=(0.5, 1.5)
-                                                          )
+
+    from Tzu_utilis.loaderHelper import readFromListWithoutNormal
+    tarin_list_path='/home/lintzuh@kean.edu/BUS/ReCAM/record/train_images_list.txt'
+    dataroot = '/home/lintzuh@kean.edu/BUS/data/Dataset_BUSI_with_GT'
+    train_list, train_label= readFromListWithoutNormal(tarin_list_path, dataroot)
+
+    # train_dataset = BUS.dataloader.BUSAffinityDataset2(    img_name_list_path = train_list,
+    #                                                       label_dir=args.ir_label_out_dir,
+    #                                                       indices_from=path_index.src_indices,
+    #                                                       indices_to=path_index.dst_indices,
+    #                                                       hor_flip=True                                                
+    #                                                       )
+    
+    train_dataset = BUS.dataloader.BUSAffinityDataset(    img_name_list_path = train_list,
+                                                        label_dir=args.ir_label_out_dir,
+                                                        indices_from=path_index.src_indices,
+                                                        indices_to=path_index.dst_indices,
+                                                        hor_flip=True,
+                                                        crop_size=args.irn_crop_size,
+                                                        crop_method="random",
+                                                        rescale=(0.5, 1.5)
+                                                        )
+    
+
+
+
+
     train_data_loader = DataLoader(train_dataset, batch_size=args.irn_batch_size,
                                    shuffle=True, num_workers=args.num_workers, pin_memory=True, drop_last=True)
 
@@ -85,10 +104,9 @@ def run(args):
         else:
             timer.reset_stage()
 
-    infer_dataset = voc12.dataloader.VOC12ImageDataset(args.infer_list,
-                                                       voc12_root=args.voc12_root,
+    infer_dataset = BUS.dataloader.BUSImageDataset(    img_name_list_path = train_list,
                                                        crop_size=args.irn_crop_size,
-                                                       crop_method="top_left")
+                                                       crop_method="random")
     infer_data_loader = DataLoader(infer_dataset, batch_size=args.irn_batch_size,
                                    shuffle=False, num_workers=args.num_workers, pin_memory=True, drop_last=True)
 

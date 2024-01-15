@@ -224,6 +224,26 @@ def getFullName(name, dataroot):
 
     return fullPath
 
+def getType(name):
+    if name[0] == 'b':
+        type = 'benign'
+    elif name[0] == 'm':
+        type = 'malignant'
+    else:
+        type = 'normal'
+
+    return type 
+def getPseudoLabelPathFromShortName_palette(shortName, pseudoPath):
+    import os
+    type = getType(shortName)
+    Final = os.path.join(pseudoPath, type, shortName+'_palette.png')
+    return Final
+
+def getPseudoLabelPathFromShortName(shortName, pseudoPath):
+    import os
+    type = getType(shortName)
+    Final = os.path.join(pseudoPath, type, shortName+'.png')
+    return Final
 
 
     

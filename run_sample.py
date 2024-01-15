@@ -3,6 +3,8 @@ import os
 import numpy as np
 
 from misc import pyutils
+import os
+# os.environ['CUDA_LAUNCH_BLOCKING'] = "1"
 
 if __name__ == '__main__':
     def str2bool(v):
@@ -90,6 +92,8 @@ if __name__ == '__main__':
     parser.add_argument("--eval_ins_seg_pass", type=str2bool, default=False)
     parser.add_argument("--make_sem_seg_pass", type=str2bool, default=False)  
     parser.add_argument("--eval_sem_seg_pass", type=str2bool, default=False)
+    
+    parser.add_argument("--cam_to_ir_label_pass_Tzu", type=str2bool, default=False)
 
     args = parser.parse_args()
 
@@ -100,6 +104,8 @@ if __name__ == '__main__':
     os.makedirs(args.ins_seg_out_dir, exist_ok=True)
     pyutils.Logger(args.log_name + '.log')
     print(vars(args))
+
+
 
 
 
@@ -138,21 +144,26 @@ if __name__ == '__main__':
     # args.cam_to_ir_label_pass = True
     if args.cam_to_ir_label_pass is True:
         import step.cam_to_ir_label
-        args.cam_out_dir = 'result/cam_merge'
-        # args.conf_fg_thres: 0.4
-        # args.ir_label_out_dir = 'result/ir_label_test'
+        # args.cam_out_dir = 'result/cam_merge'
+        # args.ir_label_out_dir = 'result/ir_label_amr_f06b03'
 
         print('hello')
-
-
-
-
-
         timer = pyutils.Timer('step.cam_to_ir_label:')
         step.cam_to_ir_label.run(args)
 
+    #my method
+    if args.cam_to_ir_label_pass_Tzu is True:
+        import step.cam_to_ir_label_1
+        # args.ir_label_out_dir = 'result/ir_label_amr_f06b03'
+
+        timer = pyutils.Timer('step.train_irn_Tzu:')
+        step.cam_to_ir_label_1.run(args)
+
+
+    # args.train_irn_pass = True
     if args.train_irn_pass is True:
         import step.train_irn
+        # args.ir_label_out_dir = 'result/ir_label_amr_f06b03'
 
         timer = pyutils.Timer('step.train_irn:')
         step.train_irn.run(args)
@@ -169,8 +180,14 @@ if __name__ == '__main__':
         timer = pyutils.Timer('step.eval_ins_seg:')
         step.eval_ins_seg.run(args)
 
+
+    # args.make_sem_seg_pass=True
     if args.make_sem_seg_pass is True:
         import step.make_sem_seg_labels
+        # args.cam_out_dir='result/cam_merge'
+        # args.ir_label_out_dir='result/ir_label_amr_f04b02'
+        # args.irn_weights_name ='sess/0115_01_res50_irn.pth'
+
 
         args.sem_seg_bg_thres = float(args.sem_seg_bg_thres)
         timer = pyutils.Timer('step.make_sem_seg_labels:')

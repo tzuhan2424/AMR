@@ -61,12 +61,11 @@ def gt(name):
 
 
 
-def pseudoLabel(name):
+def pseudoLabel(name, dataRoot = '/home/lintzuh@kean.edu/BUS/data/PseudoLabel_convexHull'):
     from help.helper import getFullName
     import cv2
     import matplotlib.pyplot as plt
 
-    dataRoot = '/home/lintzuh@kean.edu/BUS/data/PseudoLabel_convexHull'
     
     fullName = getFullName(name, dataRoot)
 
@@ -92,6 +91,27 @@ def pseudoLabel(name):
     
 
 
+def pseudoLabel_palette(name, dataRoot):
+    from help.helper import getFullName
+    import cv2
+    import matplotlib.pyplot as plt
+
+    
+    fullName = getFullName(name, dataRoot)
+    fullName=fullName[:-4] + '_palette.png'
+
+    a = cv2.imread(fullName)
+    a = cv2.cvtColor(a, cv2.COLOR_BGR2RGB)  # Convert from BGR to RGB for displaying in Matplotlib
+    label_mask = a[:, :, 0] > 0
+    # Apply this mask to all channels to turn those areas white
+    a[label_mask] = [255, 255, 255] 
+
+
+    plt.imshow(a)
+    plt.title(f"{name}")
+
+    plt.axis('off') # to turn off the axis
+    plt.show()
 
 
 
@@ -101,12 +121,12 @@ def pseudoLabel(name):
 
 if __name__ == '__main__':
     candidates = ['benign (111)', 'benign (126)', 'benign (130)', 'malignant (54)', 'benign (130)', 'malignant (194)', 'benign (388)']
-
-
+    candidates = ['malignant (36)']
+    dataRoot = '/home/lintzuh@kean.edu/BUS/AMR/result/ir_label_amrTzu_f04'
     for can in candidates:
-        camPic(can)
+        camPic(can, camFolder ='result/cam_merge')
         vex(can)
         gt(can)
-        pseudoLabel(can)
+        pseudoLabel_palette(can, dataRoot)
 
 # %%

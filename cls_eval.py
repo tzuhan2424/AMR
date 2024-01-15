@@ -13,6 +13,7 @@ from BUS import BC
 
 if __name__ == '__main__':
     weight_name = 'sess/1006_01_res50_cam.pth'
+    weight_name='/home/lintzuh@kean.edu/BUS/ReCAM/result_default5/0112_02_res50_cam'
 
     parser = argparse.ArgumentParser()
     parser.add_argument("--cam_weights_name", default=weight_name, type=str)
@@ -33,6 +34,8 @@ if __name__ == '__main__':
     #prepare the sample
 
     dataRoot = '/home/lintzuh@kean.edu/BUS/data/Dataset_BUSI_with_GT'
+
+
 
     train_images, train_labels, test_images, test_labels = load(dataRoot)  # this labels is for classfication
 

@@ -5,6 +5,7 @@ from torch.utils.data import Dataset
 import os.path
 import imageio
 from misc import imutils
+from BUS.loadhelp import getPathShortName
 
 class TorchvisionNormalize():
     def __init__(self, mean=(0.485, 0.456, 0.406), std=(0.229, 0.224, 0.225)):
@@ -148,14 +149,59 @@ class BUSClassificationDatasetMSF(BUSClassificationDataset):
         out = {"name": name, "img": ms_img_list, "size": (img.shape[0], img.shape[1]),
                "label": torch.from_numpy(self.label_list)[idx]}
         return out
+    
+
+class BUSClassificationDatasetMSF_resize(BUSClassificationDataset):
+
+    def __init__(self, img_name_list_path, cls_label,
+                 img_normal=TorchvisionNormalize(),
+                 rescale=None,
+                 crop_size=None,
+                 crop_method='random',
+                 scales=(1.0,)):
+        self.scales = scales
+
+        super().__init__(img_name_list_path, cls_label, img_normal=img_normal)
+        self.scales = scales
+
+    def __getitem__(self, idx):
+        name = self.img_name_list[idx]
+
+        img = imageio.imread(name)
+        if self.rescale:
+            img = imutils.random_scale(img, scale_range=self.rescale, order=3)
+        if self.crop_size:
+            if self.crop_method == "random":
+                img = imutils.random_crop(img, self.crop_size, 0)
+            else:
+                img = imutils.top_left_crop(img, self.crop_size, 0)
+
+        ms_img_list = []
+        for s in self.scales:
+            if s == 1:
+                s_img = img
+            else:
+                s_img = imutils.pil_rescale(img, s, order=3)
+            s_img = self.img_normal(s_img)
+            s_img = imutils.HWC_to_CHW(s_img)
+            ms_img_list.append(np.stack([s_img, np.flip(s_img, -1)], axis=0))
+        if len(self.scales) == 1:
+            ms_img_list = ms_img_list[0]
+
+        out = {"name": name, "img": ms_img_list, "size": (img.shape[0], img.shape[1]),
+               "label": torch.from_numpy(self.label_list)[idx]}
+        return out
+    
+
 
 class BUSSegmentationDataset(Dataset):
 
-    def __init__(self, img_name_list_path, crop_size,
+    def __init__(self, img_name_list_path, label_dir, crop_size,
                  rescale=None, img_normal=TorchvisionNormalize(), hor_flip=False,
                  crop_method='random'):
 
         self.img_name_list = img_name_list_path
+        self.label_dir = label_dir
 
 
         self.rescale = rescale
@@ -169,10 +215,14 @@ class BUSSegmentationDataset(Dataset):
 
     def __getitem__(self, idx):
         name = self.img_name_list[idx]
-
         img = imageio.imread(name)
         # print(os.path.join(self.label_dir, name_str + '.png'))
-        label = imageio.imread(name[:-4] + "_mask.png")
+
+
+        shortname, type= getPathShortName(name)
+
+        label_path = os.path.join(self.label_dir, type, shortname)
+        label = imageio.imread(label_path)
 
         img = np.asarray(img)
 
@@ -196,10 +246,10 @@ class BUSSegmentationDataset(Dataset):
         return {'name': name, 'img': img, 'label': label}
 
 class BUSAffinityDataset(BUSSegmentationDataset):
-    def __init__(self, img_name_list_path, crop_size,
+    def __init__(self, img_name_list_path, label_dir, crop_size,
                  indices_from, indices_to,
                  rescale=None, img_normal=TorchvisionNormalize(), hor_flip=False, crop_method=None):
-        super().__init__(img_name_list_path, crop_size, rescale, img_normal, hor_flip, crop_method=crop_method)
+        super().__init__(img_name_list_path, label_dir, crop_size, rescale, img_normal, hor_flip, crop_method=crop_method)
 
         self.extract_aff_lab_func = GetAffinityLabelFromIndices(indices_from, indices_to)
 
@@ -210,6 +260,71 @@ class BUSAffinityDataset(BUSSegmentationDataset):
         out = super().__getitem__(idx)
 
         reduced_label = imutils.pil_rescale(out['label'], 0.25, 0)
+
+
+        out['aff_bg_pos_label'], out['aff_fg_pos_label'], out['aff_neg_label'] = self.extract_aff_lab_func(reduced_label)
+
+        return out
+    
+class BUSSegmentationDataset2(Dataset):
+
+    def __init__(self, img_name_list_path, label_dir,
+                img_normal=TorchvisionNormalize(), hor_flip=False,
+                ):
+
+        self.img_name_list = img_name_list_path
+        self.label_dir = label_dir
+
+
+
+        self.img_normal = img_normal
+        self.hor_flip = hor_flip
+
+    def __len__(self):
+        return len(self.img_name_list)
+
+    def __getitem__(self, idx):
+        name = self.img_name_list[idx]
+        img = imageio.imread(name)
+        # print(os.path.join(self.label_dir, name_str + '.png'))
+
+
+        shortname, type= getPathShortName(name)
+
+        label_path = os.path.join(self.label_dir, type, shortname)
+        label = imageio.imread(label_path)
+
+        img = np.asarray(img)
+
+     
+
+        if self.img_normal:
+            img = self.img_normal(img)
+
+        if self.hor_flip:
+            img, label = imutils.random_lr_flip((img, label))
+
+
+        img = imutils.HWC_to_CHW(img)
+
+        return {'name': name, 'img': img, 'label': label}
+class BUSAffinityDataset2(BUSSegmentationDataset2):
+    def __init__(self, img_name_list_path, label_dir,
+                 indices_from, indices_to,
+                img_normal=TorchvisionNormalize(), hor_flip=False):
+        super().__init__(img_name_list_path, label_dir, img_normal, hor_flip)
+
+        self.extract_aff_lab_func = GetAffinityLabelFromIndices(indices_from, indices_to)
+
+    def __len__(self):
+        return len(self.img_name_list)
+
+    def __getitem__(self, idx):
+        out = super().__getitem__(idx)
+
+        reduced_label = imutils.pil_rescale(out['label'], 1, 0) #don't reduced
+        # reduced_label = imutils.pil_rescale(out['label'], 0.25, 0)
+
 
         out['aff_bg_pos_label'], out['aff_fg_pos_label'], out['aff_neg_label'] = self.extract_aff_lab_func(reduced_label)
 
