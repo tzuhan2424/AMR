@@ -513,13 +513,21 @@ def getDot(camFolder, filename, isShow=False):
     return 0
 
 
-def convexHullGetValid(threshold = 0.7, train_path='/home/lintzuh@kean.edu/BUS/AMR/record/ROI_FULLSET.txt', camFolder='result/cam_merge', isSaveROI=False):
+def convexHullGetValid(threshold = 0.7, train_path='/home/lintzuh@kean.edu/BUS/AMR/record/ROI_FULLSET.txt', camFolder='result/cam_merge', isSaveROI=False, savedROI_filename='convexHull_ROI.txt'):
+    
+    """
+    this is method use two rec and select the image
+    """
     train_set, _ = readFromSet_list(train_path)
 
     ROI_list = []
     for fullName in train_set:
+        
         #fullName = '/home/lintzuh@kean.edu/BUS/data/Dataset_BUSI_with_GT/benign/benign (270).png'
         img_name, type = getPathShortName(fullName) #'benign (270).png'
+        print(img_name)
+
+
         image = cv2.imread(fullName)
         cam_path=os.path.join(camFolder, type, img_name[:-4] + '.npy')
         loaded_data = np.load(cam_path,allow_pickle=True).item()
@@ -530,11 +538,11 @@ def convexHullGetValid(threshold = 0.7, train_path='/home/lintzuh@kean.edu/BUS/A
 
     
         num=find_percent_threshold(cam, 0.025)
-        points1 = find_points_in_range(cam, num, 250)
+        points1 = find_points_in_range(cam, num, 255)
         bounding_box1 = find_extreme_points(points1)
 
         num2=find_percent_threshold(cam, 0.01)
-        points2 = find_points_in_range(cam, num2, 250)
+        points2 = find_points_in_range(cam, num2, 255)
         bounding_box2 = find_extreme_points(points2)
 
         x1_leftMost, x1_rightMost, y1_top, y1_bottom = bounding_box1
@@ -547,7 +555,7 @@ def convexHullGetValid(threshold = 0.7, train_path='/home/lintzuh@kean.edu/BUS/A
             ROI_list.append((img_name[:-4], (x, y, w, h)))
     
     if isSaveROI:
-        file_path = 'convexHull_ROI.txt'
+        file_path = savedROI_filename
         with open(file_path, 'w') as file:
             # Iterate over the list and write each item followed by a newline character
             file.write('file name: (x, y, w, h)' + '\n')
@@ -556,6 +564,9 @@ def convexHullGetValid(threshold = 0.7, train_path='/home/lintzuh@kean.edu/BUS/A
 
 
 def convexHullGetWholeTrainingSetLabel(threshold = 0.7, train_path='/home/lintzuh@kean.edu/BUS/AMR/record/ROI_FULLSET.txt', camFolder='result/cam_merge', isSaveROI=False, savedROI_filename='convexHull_ROI_theWholeTrainingSet.txt'):
+    """
+    this is method, use one rec
+    """
     train_set, _ = readFromSet_list(train_path)
     ROI_list = []
     for fullName in train_set:
@@ -573,7 +584,7 @@ def convexHullGetWholeTrainingSetLabel(threshold = 0.7, train_path='/home/lintzu
 
     
         num=find_percent_threshold(cam, 0.025)
-        points1 = find_points_in_range(cam, num, 250)
+        points1 = find_points_in_range(cam, num, 255)
         bounding_box1 = find_extreme_points(points1)
 
         x1_leftMost, x1_rightMost, y1_top, y1_bottom = bounding_box1
@@ -612,9 +623,9 @@ def convexHullGetWholeTrainingSetLabel(threshold = 0.7, train_path='/home/lintzu
                 file.write(f"{item[0]}, {item[1]}\n")
 
 if __name__ == '__main__':
-    pass
-    # convexHullGetWholeTrainingSetLabel(camFolder="/data/lintzuh/BUS/Swin-Transformer/gradCamResult", isSaveROI=True, savedROI_filename = 'convexHull_ROI_theWholeTrainingSet_swin.txt')
-    # convexHullGetValid(isSaveROI=True)
+    # pass
+    # convexHullGetWholeTrainingSetLabel(camFolder="/data/lintzuh/BUS/Swin-Transformer/gradCamResult", isSaveROI=True, savedROI_filename = 'convexHull_ROI_theWholeTrainingSet255_swin.txt')
+    convexHullGetValid(camFolder="/data/lintzuh/BUS/Swin-Transformer/gradCamResult", isSaveROI=True, savedROI_filename = 'convexHull_ROI_255_swin.txt')
 
 
     # dataRoot = '/home/lintzuh@kean.edu/BUS/data/Dataset_BUSI_with_GT'
