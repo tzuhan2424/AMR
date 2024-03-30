@@ -90,11 +90,11 @@ def iou_labelcomparsion(label_path = '/home/lintzuh@kean.edu/BUS/AMR/result/ir_l
     print('miou:', (average_tm+average_bg)/2)
 
 if __name__ == '__main__':
-    label_path1 = '/home/lintzuh@kean.edu/BUS/AMR/result/ir_label_amrTzu_f04'
-    label_path2 = '/home/lintzuh@kean.edu/BUS/AMR/result/ir_label_amrTzu_f045'
-    label_path3 = '/home/lintzuh@kean.edu/BUS/AMR/result/ir_label_amrTzu_f05'
-    label_path4 = '/home/lintzuh@kean.edu/BUS/AMR/result/ir_label_amrTzu_f055'
-    label_path5 = '/home/lintzuh@kean.edu/BUS/AMR/result/ir_label_amrTzu_f06'
+    # label_path1 = '/home/lintzuh@kean.edu/BUS/AMR/result/ir_label_amrTzu_f04'
+    # label_path2 = '/home/lintzuh@kean.edu/BUS/AMR/result/ir_label_amrTzu_f045'
+    # label_path3 = '/home/lintzuh@kean.edu/BUS/AMR/result/ir_label_amrTzu_f05'
+    # label_path4 = '/home/lintzuh@kean.edu/BUS/AMR/result/ir_label_amrTzu_f055'
+    # label_path5 = '/home/lintzuh@kean.edu/BUS/AMR/result/ir_label_amrTzu_f06'
 
     # iou_labelcomparsion_p(label_path1)
     # iou_labelcomparsion_p(label_path2)
@@ -102,11 +102,21 @@ if __name__ == '__main__':
     # iou_labelcomparsion_p(label_path4)
     # iou_labelcomparsion_p(label_path5)
 
-    label1 = '/home/lintzuh@kean.edu/BUS/data/PseudoLabel'
-    label2 = '/home/lintzuh@kean.edu/BUS/data/PseudoLabel_convexHull'
+    # label1 = '/home/lintzuh@kean.edu/BUS/data/PseudoLabel'
+    # label2 = '/home/lintzuh@kean.edu/BUS/data/PseudoLabel_convexHull'
+    # iou_labelcomparsion(label1)
+    # iou_labelcomparsion(label2)
 
-    iou_labelcomparsion(label1)
-    iou_labelcomparsion(label2)
 
+    label1= '/home/lintzuh@kean.edu/BUS/ReCAM/result_default5/ir_label_recamTzu_f025'
+    label2= '/home/lintzuh@kean.edu/BUS/ReCAM/result_default5/ir_label_recamTzu_f03'
+    label3= '/home/lintzuh@kean.edu/BUS/ReCAM/result_default5/ir_label_recamTzu_f033'
+    label4= '/home/lintzuh@kean.edu/BUS/ReCAM/result_default5/ir_label_recamTzu_f04'
+    label5= '/home/lintzuh@kean.edu/BUS/ReCAM/result_default5/ir_label_recamTzu_f045'
+    iou_labelcomparsion_p(label1)
+    iou_labelcomparsion_p(label2)
+    iou_labelcomparsion_p(label3)
+    iou_labelcomparsion_p(label4)
+    iou_labelcomparsion_p(label5)
 
 # %%

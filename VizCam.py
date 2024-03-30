@@ -21,7 +21,7 @@ def camViz(camFolder):
             malignant_image.append(item)
 
     tumor = benign_image+malignant_image
-    selected_images = random.sample(tumor, int(len(tumor) * 0.25))
+    selected_images = random.sample(tumor, int(len(tumor) * 0.10))
     processed_images = []
 
     for i, filename in enumerate(selected_images):
@@ -43,9 +43,11 @@ def camViz(camFolder):
 
 
 
+
 #%%
 if __name__ == '__main__':
     # p='/home/lintzuh@kean.edu/BUS/ReCAM/result_default5/cam_mask'
     p='/home/lintzuh@kean.edu/BUS/ReCAM/result_default5/recam_mask'
+    p='/data/lintzuh/BUS/Swin-Transformer/gradCamResult'
     camViz(p)
 # %%

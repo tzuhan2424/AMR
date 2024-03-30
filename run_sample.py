@@ -4,6 +4,8 @@ import numpy as np
 
 from misc import pyutils
 import os
+
+import step.make_cam_withoutAD
 # os.environ['CUDA_LAUNCH_BLOCKING'] = "1"
 
 if __name__ == '__main__':
@@ -128,11 +130,24 @@ if __name__ == '__main__':
 
     if args.make_cam_pass is True:
         import step.make_cam
-        # args.cam_weights_name="sess/0831_08_res50_cam.pth" 
-        # args.amr_weights_name="sess/0831_01_res50_amr.pth"
+        args.cam_weights_name="sess/1006_01_res50_cam.pth" 
+        args.amr_weights_name="sess/1006_01_res50_amr.pth"
 
         timer = pyutils.Timer('step.make_cam:')
         step.make_cam.run(args)
+
+
+
+    args.make_camWithouAD_pass = True
+    if args.make_camWithouAD_pass is True:
+        import step.make_cam
+        args.cam_weights_name="sess/1006_01_res50_cam.pth" 
+        args.amr_weights_name="sess/1006_01_res50_amr.pth"
+
+        timer = pyutils.Timer('step.make_cam:')
+        step.make_cam_withoutAD.run(args)
+
+
 
     
     if args.eval_cam_pass is True:
@@ -156,7 +171,7 @@ if __name__ == '__main__':
         import step.cam_to_ir_label_1
         # args.ir_label_out_dir = 'result/ir_label_amr_f06b03'
 
-        timer = pyutils.Timer('step.train_irn_Tzu:')
+        timer = pyutils.Timer('step.cam_to_ir_label_Tzu:')
         step.cam_to_ir_label_1.run(args)
 
 

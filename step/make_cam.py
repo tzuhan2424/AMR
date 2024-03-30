@@ -37,6 +37,7 @@ def _work(process_id, model, dataset, args):
     with cuda.device(process_id):
         model.cuda()
         gcam = GradCAM(model=model, candidate_layers=["stage4", "stage2_4"])
+
         for iter, pack in enumerate(data_loader):
             img_name = pack['name'][0] #../Datasetsomthing/benign/benign (132).png
             #   [/home/lintzuh@kean.edu/BUS/data/Dataset_BUSI_with_GT/benign/benign (1).png]
@@ -135,7 +136,7 @@ def _work(process_id, model, dataset, args):
             highres_cam1 = torch.sum(torch.stack(highres_cam1, 0), 0)[:, 0, :size[0], :size[1]]
             strided_cam1 /= F.adaptive_max_pool2d(strided_cam1, (1, 1)) + 1e-5
             highres_cam1 /= F.adaptive_max_pool2d(highres_cam1, (1, 1)) + 1e-5
-
+            
             # 2
             for s_count, size_idx in enumerate([1, 2, 0, 3, 4, 5, 6]):
                 orig_img = pack['img'][size_idx].clone()
@@ -227,13 +228,14 @@ def run(args):
     model.eval()
 
     n_gpus = torch.cuda.device_count()
+    n_gpus=1
+    train_images = ['/home/lintzuh@kean.edu/BUS/data/Dataset_BUSI_with_GT/benign/benign (270).png', '/home/lintzuh@kean.edu/BUS/data/Dataset_BUSI_with_GT/benign/benign (271).png']
+    train_labels = [1,1]
 
     dataset = BUS.dataloader.BUSClassificationDatasetMSF(train_images, np.array(train_labels), scales=args.cam_scales)
     dataset = torchutils.split_dataset(dataset, n_gpus)
 
 
-
-    
 
     print('[ ', end='')
 

@@ -1,5 +1,5 @@
 #%%
-from convexHull import convexHullPic
+from convexHull import convexHullPic, convexHullPic_singleBbox
 def loadBenignMalignant():
     from help.camHelper import load
     dataRoot = '/home/lintzuh@kean.edu/BUS/data/Dataset_BUSI_with_GT'
@@ -48,11 +48,79 @@ def convexHullViz(camFolder):
 
         # if j==20:
         #     break
+def convexHullVisSave(camFolder):
+    import os
+    import matplotlib.pyplot as plt
+    import cv2
+    import random
+    random.seed(42)
+
+
+    tumor = loadBenignMalignant()
+
+    selected_images = random.sample(tumor, int(len(tumor) * 0.10))
+
+    processed_images = []
+    # saveDir = 'convexViz'
+    # os.makedirs(saveDir, exist_ok=True)
+    #benign (189).png and benign (87).png have prob
+    for i, filename in enumerate(selected_images):
+        directory, img_name = os.path.split(filename)
+        a = convexHullPic_singleBbox(camFolder, filename)
+        processed_images.append((a, img_name))
+
+        if (i + 1) % 4 == 0 or (i + 1) == len(selected_images):
+            fig, axes = plt.subplots(1, 4, figsize=(12, 3)) # Adjust figsize as needed
+            for ax, (img, name) in zip(axes, processed_images):
+                ax.imshow(img)
+                ax.set_title(name[:-4])
+                ax.axis('off')
+
+            plt.tight_layout()
+            plt.show()
+
+            processed_images = []
+def convexHullVizSave_selectedImg(camFolder):
+    import os
+    import matplotlib.pyplot as plt
+    import cv2
+ 
+    # Define the directory for saving the output
+    saveDir = 'convexViz'
+    os.makedirs(saveDir, exist_ok=True)
+
+    # List of problematic image filenames
+    problem_images = [
+        'benign (189).png',
+        'benign (87).png'
+    ]
+    dataRoot = '/home/lintzuh@kean.edu/BUS/data/Dataset_BUSI_with_GT'
+
+
+    for img_name in problem_images:
+        # Construct the full path for each problematic image
+        filename = os.path.join(dataRoot,'benign', img_name)  # Adjust this if necessary
+        processed_img = convexHullPic_singleBbox(camFolder, filename)
+
+        # Display the processed image
+        plt.figure(figsize=(6, 6))  # Adjust figsize as needed
+        plt.imshow(processed_img)
+        plt.title(img_name[:-4])
+        plt.axis('off')
+        plt.show()
+
+        # Optionally, save the figure as an image file
+        figure_image_path = os.path.join(saveDir, f"{img_name[:-4]}_fig.png")
+        plt.savefig(figure_image_path)
+        plt.close()
+
+
 
 
 
 
 
 if __name__ == '__main__':
-    convexHullViz('result/cam_merge')
+    # convexHullVisSave('/data/lintzuh/BUS/Swin-Transformer/gradCamResult')
+    convexHullVizSave_selectedImg('/data/lintzuh/BUS/Swin-Transformer/gradCamResult')
 # %%

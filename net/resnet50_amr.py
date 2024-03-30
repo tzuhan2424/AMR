@@ -105,7 +105,7 @@ class CAM(Net):
             x = self.stage3(x)
             x = self.stage4(x)
     
-            cam1 = F.conv2d(x, self.classifier.weight)
+            cam1 = F.conv2d(x, self.classifier.weight) #self.classifier.weight.shape [2, 2048, 1 1], x.shape[2, 2048, 11, 16], cam1.shape[2, 2, 11, 16]->[b, n, ...]
             return cam1
 
 

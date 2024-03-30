@@ -383,16 +383,55 @@ def convexHullPic(camFolder, filename):
     num2=find_percent_threshold(cam, 0.01)
     points2 = find_points_in_range(cam, num2, 250)
     bounding_box2 = find_extreme_points(points2)
+    
+    # Check if bounding boxes are not None and contain valid coordinates
+    if bounding_box1 and bounding_box2 and all(bounding_box1) and all(bounding_box2):
+        x1_leftMost, x1_rightMost, y1_top, y1_bottom = bounding_box1
+        x2_leftMost, x2_rightMost, y2_top, y2_bottom = bounding_box2
 
-
-    x1_leftMost, x1_rightMost, y1_top, y1_bottom = bounding_box1
-    x2_leftMost, x2_rightMost, y2_top, y2_bottom = bounding_box2
-
-    iou = rectangle_iou([x1_leftMost, y1_top, x1_rightMost, y1_bottom],[x2_leftMost, y2_top, x2_rightMost, y2_bottom])
-
-    pic = draw_bounding_boxes(image,bounding_box1,bounding_box2)
+        iou = rectangle_iou([x1_leftMost, y1_top, x1_rightMost, y1_bottom], [x2_leftMost, y2_top, x2_rightMost, y2_bottom])
+        pic = draw_bounding_boxes(image, bounding_box1, bounding_box2)
+    else:
+        print(f"Invalid bounding box data for image {img_name}.")
+        # Handle the case where bounding boxes are invalid
+        iou = 0
+        pic = image 
 
     return pic, iou
+
+def convexHullPic_singleBbox(camFolder, filename):
+    img_name, type = getPathShortName(filename)
+    # print(img_name[:-4])
+    image = cv2.imread(filename)
+    cam_path=os.path.join(camFolder, type, img_name[:-4] + '.npy')
+
+    loaded_data = np.load(cam_path,allow_pickle=True).item()
+    cam = loaded_data['high_res']
+    cam = (cam - cam.min()) / (cam.max() - cam.min()) * 255
+    cam = np.uint8(cam)
+    cam = cam.reshape((image.shape[0], image.shape[1]))
+
+
+    num=find_percent_threshold(cam, 0.025)
+    points1 = find_points_in_range(cam, num, 250)
+    bounding_box1 = find_extreme_points(points1)
+    # print('points1')
+    # print('bounding_box1', bounding_box1)
+
+
+     # image_with_boxes = cv2.rectangle(image.copy(), (x_left1, y_top1), (x_right1, y_bottom1), (255, 0, 0), 2)
+
+    # Check if bounding boxes are not None and contain valid coordinates
+    if bounding_box1:
+        # Draw the bounding box on the image
+        x_leftMost, x_rightMost, y_top, y_bottom = bounding_box1
+        cv2.rectangle(image, (x_leftMost, y_top), (x_rightMost, y_bottom), (0, 255, 0), 2)
+        pic = image
+    else:
+        print(f"Invalid bounding box data for image {img_name}.")
+        pic = image 
+
+    return pic
 
 
 def getDot(camFolder, filename, isShow=False):
@@ -516,12 +555,14 @@ def convexHullGetValid(threshold = 0.7, train_path='/home/lintzuh@kean.edu/BUS/A
                 file.write(f"{item[0]}, {item[1]}\n")
 
 
-def convexHullGetWholeTrainingSetLabel(threshold = 0.7, train_path='/home/lintzuh@kean.edu/BUS/AMR/record/ROI_FULLSET.txt', camFolder='result/cam_merge', isSaveROI=False):
+def convexHullGetWholeTrainingSetLabel(threshold = 0.7, train_path='/home/lintzuh@kean.edu/BUS/AMR/record/ROI_FULLSET.txt', camFolder='result/cam_merge', isSaveROI=False, savedROI_filename='convexHull_ROI_theWholeTrainingSet.txt'):
     train_set, _ = readFromSet_list(train_path)
     ROI_list = []
     for fullName in train_set:
         #fullName = '/home/lintzuh@kean.edu/BUS/data/Dataset_BUSI_with_GT/benign/benign (270).png'
         img_name, type = getPathShortName(fullName) #'benign (270).png'
+        print(img_name)
+
         image = cv2.imread(fullName)
         cam_path=os.path.join(camFolder, type, img_name[:-4] + '.npy')
         loaded_data = np.load(cam_path,allow_pickle=True).item()
@@ -536,12 +577,34 @@ def convexHullGetWholeTrainingSetLabel(threshold = 0.7, train_path='/home/lintzu
         bounding_box1 = find_extreme_points(points1)
 
         x1_leftMost, x1_rightMost, y1_top, y1_bottom = bounding_box1
-        x,y,w,h = x1_leftMost, y1_top, x1_rightMost-x1_leftMost,y1_bottom-y1_top
+        # x,y,w,h = x1_leftMost, y1_top, x1_rightMost-x1_leftMost,y1_bottom-y1_top
+
+        #see exception
+        w = None
+        h = None
+        if x1_rightMost is None or x1_leftMost is None:
+            print(f"{img_name}, Error: Rightmost or leftmost x-coordinate is None")
+        else:
+            w = x1_rightMost - x1_leftMost
+
+        if y1_bottom is None or y1_top is None:
+            print(f"{img_name}, Error: Bottom or top y-coordinate is None")
+        else:
+            h = y1_bottom - y1_top
+
+        # Check if w and h have been set properly before assigning x, y, w, h
+        if w is not None and h is not None:
+            x, y = x1_leftMost, y1_top
+        else:
+            # Handle the case where w or h couldn't be computed due to None values
+            print(f"{img_name}, Error: Cannot compute width or height due to None values")
+            # Set x, y, w, h to None or some default values as appropriate
+            x = y = w = h = None
 
         ROI_list.append((img_name[:-4], (x, y, w, h)))   
     
     if isSaveROI:
-        file_path = 'convexHull_ROI_theWholeTrainingSet.txt'
+        file_path = savedROI_filename
         with open(file_path, 'w') as file:
             # Iterate over the list and write each item followed by a newline character
             file.write('file name: (x, y, w, h)' + '\n')
@@ -549,7 +612,8 @@ def convexHullGetWholeTrainingSetLabel(threshold = 0.7, train_path='/home/lintzu
                 file.write(f"{item[0]}, {item[1]}\n")
 
 if __name__ == '__main__':
-    convexHullGetWholeTrainingSetLabel(isSaveROI=True)
+    pass
+    # convexHullGetWholeTrainingSetLabel(camFolder="/data/lintzuh/BUS/Swin-Transformer/gradCamResult", isSaveROI=True, savedROI_filename = 'convexHull_ROI_theWholeTrainingSet_swin.txt')
     # convexHullGetValid(isSaveROI=True)
 
 

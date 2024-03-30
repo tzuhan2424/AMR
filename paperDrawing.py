@@ -121,8 +121,10 @@ def pseudoLabel_palette(name, dataRoot):
 
 if __name__ == '__main__':
     candidates = ['benign (111)', 'benign (126)', 'benign (130)', 'malignant (54)', 'benign (130)', 'malignant (194)', 'benign (388)']
-    candidates = ['malignant (36)']
-    dataRoot = '/home/lintzuh@kean.edu/BUS/AMR/result/ir_label_amrTzu_f04'
+    candidates = ['benign (1)']
+    # dataRoot = '/home/lintzuh@kean.edu/BUS/AMR/result/ir_label_amrTzu_f04'
+    dataRoot = '/home/lintzuh@kean.edu/BUS/ReCAM/result_default5/ir_label_recamTzu_f03'
+
     for can in candidates:
         camPic(can, camFolder ='result/cam_merge')
         vex(can)

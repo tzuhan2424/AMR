@@ -1,3 +1,5 @@
 sess/
 result/
 result_previous/
+convexViz
+*.pyc
