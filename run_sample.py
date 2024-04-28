@@ -138,14 +138,14 @@ if __name__ == '__main__':
 
 
 
-    args.make_camWithouAD_pass = True
-    if args.make_camWithouAD_pass is True:
-        import step.make_cam
-        args.cam_weights_name="sess/1006_01_res50_cam.pth" 
-        args.amr_weights_name="sess/1006_01_res50_amr.pth"
+    # args.make_camWithouAD_pass = True
+    # if args.make_camWithouAD_pass is True:
+    #     import step.make_cam
+    #     args.cam_weights_name="sess/1006_01_res50_cam.pth" 
+    #     args.amr_weights_name="sess/1006_01_res50_amr.pth"
 
-        timer = pyutils.Timer('step.make_cam:')
-        step.make_cam_withoutAD.run(args)
+    #     timer = pyutils.Timer('step.make_cam:')
+    #     step.make_cam_withoutAD.run(args)
 
 
 
